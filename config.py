@@ -2,7 +2,7 @@ import argparse
 import json
 import logging
 import sys
-from base64 import b85decode
+import base64
 from pathlib import Path
 
 log_format = '%(asctime)s %(name)s[%(module)s] %(levelname)s: %(message)s'
@@ -27,21 +27,15 @@ class Config:
         the_config.debug = d.get('debug', False)
 
         try:
-            the_config.jd = {
-                'username': b85decode(d['bluegq']['username']).decode(),
-                'password': b85decode(d['bluegq']['password']).decode()
+            the_config.bluegq = {
+                'username': base64.b85decode(d['bluegq']['username']).decode(),
+                'password': base64.b85decode(d['bluegq']['password']).decode()
             }
         except Exception as e:
-            logging.error('获取京东帐号出错: ' + repr(e))
+            logging.error('获取帐号出错: ' + repr(e))
 
         if not (the_config.bluegq['username'] and the_config.bluegq['password']):
-            # 有些页面操作还是有用的, 比如移动焦点到输入框... 滚动页面到登录表单位置等
-            # 所以不禁止 browser 的 auto_login 动作了, 但两项都有才自动提交, 否则只进行自动填充动作
-            the_config.jd['auto_submit'] = 0  # used in js
-            logging.info('用户名/密码未找到, 自动登录功能将不可用.')
-
-        else:
-            the_config.jd['auto_submit'] = 1
+            logging.info('用户名/密码未找到.')
 
         return the_config
 
@@ -76,3 +70,4 @@ def load_config():
 
 
 config = load_config()
+# print(base64.b85encode(b'abc'))
