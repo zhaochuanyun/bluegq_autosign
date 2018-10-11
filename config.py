@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 import argparse
 import json
 import logging
@@ -46,7 +48,7 @@ def load_config():
     args = parser.parse_args()
 
     config_name = args.config or 'config.json'
-    logging.info('使用配置文件 "{}".'.format(config_name))
+    logging.debug('使用配置文件 "{}".'.format(config_name))
 
     config_file = Path(__file__).parent.joinpath('conf/', config_name)
 
