@@ -1,7 +1,8 @@
-{
-  "debug": false,
-  "bluegq": {
-    "username": "",
-    "password": ""
+[
+  {
+    "bluegq": {
+      "username": "",
+      "password": ""
+    }
   }
-}
+]

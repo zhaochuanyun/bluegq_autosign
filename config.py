@@ -13,30 +13,27 @@ logging.basicConfig(format=log_format, level=logging.INFO)
 
 class Config:
     def __init__(self):
-        self.debug = False
         self.log_format = log_format
-        self.ua = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.12; rv:52.0) Gecko/20100101 Firefox/52.0'
-
-        self.bluegq = {
-            'username': '',
-            'password': ''
-        }
+        self.bluegqs = []
 
     @classmethod
-    def load(cls, d):
+    def load(cls, list):
         the_config = Config()
 
-        the_config.debug = d.get('debug', False)
+        configs = []
 
         try:
-            the_config.bluegq = {
-                'username': base64.b85decode(d['bluegq']['username']).decode(),
-                'password': base64.b85decode(d['bluegq']['password']).decode()
-            }
+            for blue in list:
+                dict = {
+                    'username': base64.b85decode(blue['bluegq']['username']).decode(),
+                    'password': base64.b85decode(blue['bluegq']['password']).decode()
+                }
+                configs.append(dict)
+            the_config.bluegqs = configs
         except Exception as e:
             logging.error('获取帐号出错: ' + repr(e))
 
-        if not (the_config.bluegq['username'] and the_config.bluegq['password']):
+        if len(configs) == 0:
             logging.info('用户名/密码未找到.')
 
         return the_config
@@ -62,13 +59,11 @@ def load_config():
         # 只有 Path.resolve(strict=True) 才抛, 但 strict 默认为 False.
         # 感觉 3.6 的更合理些...
         config_file = config_file.resolve()
-        config_dict = json.loads(config_file.read_text())
+        config_list = json.loads(config_file.read_text())
     except Exception as e:
         sys.exit('# 错误: 配置文件载入失败: {}'.format(e))
 
-    the_config = Config.load(config_dict)
-
-    return the_config
+    return Config.load(config_list)
 
 
 config = load_config()

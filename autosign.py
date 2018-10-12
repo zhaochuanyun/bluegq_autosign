@@ -10,9 +10,11 @@ logger = logging.getLogger('jobs')
 def main():
     set_logger()
     # session = make_session()
-    (session, loginhash, formhash, seccodehash, verifycode) = recognize.get_login_info()
-    login(session, loginhash, formhash, seccodehash, verifycode, config.bluegq['username'], config.bluegq['password'])
-    sign(session, formhash)
+    for bluegq in config.bluegqs:
+        (session, loginhash, formhash, seccodehash, verifycode) = recognize.get_login_info()
+        login(session, loginhash, formhash, seccodehash, verifycode, bluegq['username'], bluegq['password'])
+        formhash = get_formhash(session)
+        sign(session, formhash)
 
 
 def set_logger():
@@ -56,26 +58,42 @@ def login(session, loginhash, formhash, seccodehash, verifycode, username, passw
     logger.info('登录信息: ' + r.text[p_start:p_endt] + '\n')
 
 
-# 签到
-def sign(session, formhash):
-    url = 'http://www.bluegq.com/plugin.php?id=fx_checkin:checkin'
-    data = {'formhash': formhash + '&' + formhash,
-            'infloat': 'yes',
-            'handlekey': 'fx_checkin',
-            'inajax': '1',
-            'ajaxtarget': 'fwin_content_fx_checkin'
-            }
-    headers = {'Host': 'www.bluegq.com', 'Connection': 'keep-alive', 'Content-Length': '233',
-               'Cache-Control': 'no-cache',
-               'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/69.0.3497.100 Safari/537.36',
-               'Content-Type': 'application/x-www-form-urlencoded',
-               'Accept': '*/*',
-               'Referer': 'http://www.bluegq.com/forum.php',
+# 获取formhash
+def get_formhash(session):
+    url = 'http://www.bluegq.com/forum.php'
+    headers = {'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8',
                'Accept-Encoding': 'gzip, deflate',
-               'Accept-Language': 'zh-CN,zh;q=0.9,en-US;q=0.8,en;q=0.7,de;q=0.6,ja;q=0.5'}
+               'Accept-Language': 'zh-CN,zh;q=0.9,en-US;q=0.8,en;q=0.7,de;q=0.6,ja;q=0.5',
+               'Cache-Control': 'no-cache',
+               'Connection': 'keep-alive',
+               'Host': 'www.bluegq.com',
+               'Pragma': 'no-cache',
+               'Referer': 'http://www.bluegq.com/portal.php?mod=index',
+               'Upgrade-Insecure-Requests': '1',
+               'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/69.0.3497.100 Safari/537.36'}
     session.headers.clear()
     session.headers.update(headers)
-    r = session.post(url, data)
+    r = session.get(url)
+    p = r.text.find('formhash=') + len('formhash=')
+    return r.text[p:p + 8]
+
+
+# 签到
+def sign(session, formhash):
+    url = 'http://www.bluegq.com/plugin.php?id=fx_checkin:checkin&formhash=' + formhash + '&infloat=yes&handlekey=fx_checkin&inajax=1&ajaxtarget=fwin_content_fx_checkin'
+    headers = {'Accept': '*/*',
+               'Accept-Encoding': 'gzip, deflate',
+               'Accept-Language': 'zh-CN,zh;q=0.9,en-US;q=0.8,en;q=0.7,de;q=0.6,ja;q=0.5',
+               'Cache-Control': 'no-cache',
+               'Connection': 'keep-alive',
+               'Host': 'www.bluegq.com',
+               'Pragma': 'no-cache',
+               'Referer': 'http://www.bluegq.com/forum.php',
+               'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/69.0.3497.100 Safari/537.36',
+               'X-Requested-With': 'XMLHttpRequest'}
+    session.headers.clear()
+    session.headers.update(headers)
+    r = session.get(url)
     logger.info('签到信息: ' + r.text)
 
 

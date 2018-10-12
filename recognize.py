@@ -7,16 +7,14 @@ import numpy as np
 import pytesseract
 import requests
 
-session = requests.session()
-
 
 def get_login_info():
-    (loginhash, formhash, seccodehash) = get_login_hash()
-    get_verifycode(get_update_code(), seccodehash)
+    (session, loginhash, formhash, seccodehash) = get_login_hash()
+    get_verifycode(session, get_update_code(session, seccodehash), seccodehash)
     verifycode = recognize_code()
-    while not check_verifycode(loginhash, seccodehash, verifycode):
-        (loginhash, formhash, seccodehash) = get_login_hash()
-        get_verifycode(get_update_code(), seccodehash)
+    while not check_verifycode(session, loginhash, seccodehash, verifycode):
+        (session, loginhash, formhash, seccodehash) = get_login_hash()
+        get_verifycode(session, get_update_code(session, seccodehash), seccodehash)
         verifycode = recognize_code()
     return session, loginhash, formhash, seccodehash, verifycode
 
@@ -29,6 +27,7 @@ def get_login_hash():
                'X-Requested-With': 'XMLHttpRequest', 'Accept': '*/*', 'Referer': 'www.bluegq.com/member.php',
                'Accept-Encoding': 'gzip, deflate, sdch', 'Accept-Language': 'zh-CN,zh;q=0.8'}
     # 清空原来的headers
+    session = requests.session()
     session.headers.clear()
     # 更新headers
     session.headers.update(headers)
@@ -42,12 +41,12 @@ def get_login_hash():
     # 获取seccodehash
     p = r.text.find('seccode_') + len('seccode_')
     seccodehash = r.text[p:p + 8]
-    return (loginhash, formhash, seccodehash)
+    return (session, loginhash, formhash, seccodehash)
 
 
 # 获取update
-def get_update_code():
-    url = 'http://www.bluegq.com/misc.php?mod=seccode&action=update&idhash=cSssB2dv&0.04821189811991089&modid=member::logging'
+def get_update_code(session, idhash):
+    url = 'http://www.bluegq.com/misc.php?mod=seccode&action=update&idhash=' + idhash + '&modid=member::logging'
     r = session.get(url)
     p = r.text.find('update=') + len('update=')
     update = r.text[p:p + 5]
@@ -55,7 +54,7 @@ def get_update_code():
 
 
 # 获取验证码
-def get_verifycode(update, seccodehash, name='code.png'):
+def get_verifycode(session, update, seccodehash, name='code.png'):
     url = 'http://www.bluegq.com/misc.php?mod=seccode&update=' + update + '&idhash=' + seccodehash
     headers = {'Host': 'www.bluegq.com', 'Connection': 'keep-alive',
                'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/69.0.3497.100 Safari/537.36',
@@ -73,7 +72,7 @@ def get_verifycode(update, seccodehash, name='code.png'):
 
 
 # 检查验证码是否正确
-def check_verifycode(loginhash, seccodehash, code):
+def check_verifycode(session, loginhash, seccodehash, code):
     url = 'http://www.bluegq.com/misc.php?mod=seccode&action=check&inajax=1&modid=member::logging&idhash=' + seccodehash + '&secverify=' + code
     headers = {'Host': 'www.bluegq.com', 'Connection': 'keep-alive',
                'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/69.0.3497.100 Safari/537.36',
@@ -110,6 +109,6 @@ def recognize_code():
     # plt.imshow(img)
     # plt.show()
 
-    img.save('data/code_l.png')
+    # img.save('data/code_l.png')
 
     return pytesseract.image_to_string(img).lower()
