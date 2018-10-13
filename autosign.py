@@ -55,7 +55,7 @@ def login(session, loginhash, formhash, seccodehash, verifycode, username, passw
     r = session.post(url, data)
     p_start = r.text.find('欢迎您回来')
     p_endt = r.text.find('\';</script>')
-    logger.info('登录信息: ' + r.text[p_start:p_endt] + '\n')
+    logger.info('登录信息: ' + r.text[p_start:p_endt])
 
 
 # 获取formhash
@@ -94,7 +94,9 @@ def sign(session, formhash):
     session.headers.clear()
     session.headers.update(headers)
     r = session.get(url)
-    logger.info('签到信息: ' + r.text)
+    p_start = r.text.find('showDialog(\'') + len('showDialog(\'')
+    p_end = r.text.find(', \'right\'') - 1
+    logger.info('签到信息: ' + r.text[p_start:p_end] + '\n')
 
 
 if __name__ == '__main__':
