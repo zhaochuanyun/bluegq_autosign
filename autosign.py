@@ -1,4 +1,5 @@
-# -*- coding: utf-8 -*-
+#!/usr/bin/env/ python3
+# -*-coding:utf-8-*-
 
 import logging
 from config import config
@@ -56,7 +57,7 @@ def login(session, loginhash, formhash, seccodehash, verifycode, username, passw
     r = session.post(url, data)
     p_start = r.text.find('欢迎您回来')
     p_endt = r.text.find('\';</script>')
-    logger.info('登录信息: ' + r.text[p_start:p_endt])
+    logger.info(u'登录信息: ' + r.text[p_start:p_endt])
 
 
 # 获取formhash

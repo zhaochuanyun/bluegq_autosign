@@ -1,11 +1,12 @@
+#!/usr/bin/env/ python3
 # -*- coding: utf-8 -*-
-
 
 from PIL import Image
 import matplotlib.pyplot as plt
 import numpy as np
 import pytesseract
 import requests
+import os
 
 
 def get_login_info():
@@ -91,7 +92,12 @@ def check_verifycode(session, loginhash, seccodehash, code):
 
 
 def recognize_code():
-    img = Image.open('data/code.png')
+    try:
+        img = Image.open('data/code.png')
+    except OSError:
+        os.remove('data/code.png')
+        return 'abcd'
+
     img_width, img_height = img.size
     img = img.convert('L')
 
