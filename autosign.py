@@ -15,6 +15,7 @@ def main():
         login(session, loginhash, formhash, seccodehash, verifycode, bluegq['username'], bluegq['password'])
         formhash = get_formhash(session)
         sign(session, formhash)
+        score(session, bluegq['uid'])
 
 
 def set_logger():
@@ -96,7 +97,27 @@ def sign(session, formhash):
     r = session.get(url)
     p_start = r.text.find('showDialog(\'') + len('showDialog(\'')
     p_end = r.text.find(', \'right\'') - 1
-    logger.info('签到信息: ' + r.text[p_start:p_end] + '\n')
+    logger.info('签到信息: ' + r.text[p_start:p_end])
+
+
+# 查看积分
+def score(session, uid):
+    url = 'http://www.bluegq.com/home.php?mod=space&uid=' + uid
+    headers = {'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8',
+               'Accept-Encoding': 'gzip, deflate',
+               'Accept-Language': 'zh-CN,zh;q=0.9,en-US;q=0.8,en;q=0.7,de;q=0.6,ja;q=0.5',
+               'Cache-Control': 'no-cache',
+               'Connection': 'keep-alive',
+               'Host': 'www.bluegq.com',
+               'Pragma': 'no-cache',
+               'Upgrade-Insecure-Requests': '1',
+               'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/69.0.3497.100 Safari/537.36'}
+    session.headers.clear()
+    session.headers.update(headers)
+    r = session.get(url)
+    p_start = r.text.find('<li><em>B币</em>') + len('<li><em>B币</em>')
+    p_end = r.text.find('<li><em>蓝币</em>') - 7
+    logger.info('当前B币: ' + r.text[p_start:p_end] + '\n')
 
 
 if __name__ == '__main__':

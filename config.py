@@ -26,7 +26,8 @@ class Config:
             for blue in list:
                 dict = {
                     'username': base64.b85decode(blue['bluegq']['username']).decode(),
-                    'password': base64.b85decode(blue['bluegq']['password']).decode()
+                    'password': base64.b85decode(blue['bluegq']['password']).decode(),
+                    'uid': blue['bluegq']['uid']
                 }
                 configs.append(dict)
             the_config.bluegqs = configs
