@@ -67,7 +67,7 @@ def get_verifycode(session, update, seccodehash, name='code.png'):
     session.headers.update(headers)
     r = session.get(url)
     # 保存验证码图片
-    file = open('data/' + name, 'wb')
+    file = open(os.path.abspath(os.path.dirname(os.path.abspath(__file__)) + os.path.sep + ".") + '/data/' + name, 'wb')
     file.write(r.content)
     file.close()
 
@@ -93,9 +93,9 @@ def check_verifycode(session, loginhash, seccodehash, code):
 
 def recognize_code():
     try:
-        img = Image.open('data/code.png')
+        img = Image.open(os.path.abspath(os.path.dirname(os.path.abspath(__file__)) + os.path.sep + ".") + '/data/code.png')
     except OSError:
-        os.remove('data/code.png')
+        os.remove(os.path.abspath(os.path.dirname(os.path.abspath(__file__)) + os.path.sep + ".") + '/data/code.png')
         return 'abcd'
 
     img_width, img_height = img.size
