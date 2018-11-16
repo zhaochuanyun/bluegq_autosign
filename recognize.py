@@ -55,7 +55,7 @@ def get_update_code(session, idhash):
 
 
 # 获取验证码
-def get_verifycode(session, update, seccodehash, name='code.png'):
+def get_verifycode(session, update, seccodehash, folder='/data/', name='code.png'):
     url = 'http://www.bluegq.com/misc.php?mod=seccode&update=' + update + '&idhash=' + seccodehash
     headers = {'Host': 'www.bluegq.com', 'Connection': 'keep-alive',
                'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/69.0.3497.100 Safari/537.36',
@@ -67,7 +67,7 @@ def get_verifycode(session, update, seccodehash, name='code.png'):
     session.headers.update(headers)
     r = session.get(url)
     # 保存验证码图片
-    file = open(os.path.abspath(os.path.dirname(os.path.abspath(__file__)) + os.path.sep + ".") + '/data/' + name, 'wb')
+    file = open(os.path.abspath(os.path.dirname(os.path.abspath(__file__)) + os.path.sep + ".") + folder + name, 'wb')
     file.write(r.content)
     file.close()
 
@@ -91,11 +91,12 @@ def check_verifycode(session, loginhash, seccodehash, code):
         return True
 
 
-def recognize_code():
+def recognize_code(folder='/data/'):
     try:
-        img = Image.open(os.path.abspath(os.path.dirname(os.path.abspath(__file__)) + os.path.sep + ".") + '/data/code.png')
+        img = Image.open(
+            os.path.abspath(os.path.dirname(os.path.abspath(__file__)) + os.path.sep + ".") + folder + 'code.png')
     except OSError:
-        os.remove(os.path.abspath(os.path.dirname(os.path.abspath(__file__)) + os.path.sep + ".") + '/data/code.png')
+        os.remove(os.path.abspath(os.path.dirname(os.path.abspath(__file__)) + os.path.sep + ".") + folder + 'code.png')
         return 'abcd'
 
     img_width, img_height = img.size
